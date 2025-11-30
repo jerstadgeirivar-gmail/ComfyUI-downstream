@@ -238,6 +238,12 @@ class QuantizedTensor(torch.Tensor):
     def is_contiguous(self, *arg, **kwargs):
         return self._qdata.is_contiguous(*arg, **kwargs)
 
+    def storage(self):
+        return self._qdata.storage()
+
+    def untyped_storage(self):
+        return self._qdata.untyped_storage()
+
 # ==============================================================================
 # Generic Utilities (Layout-Agnostic Operations)
 # ==============================================================================

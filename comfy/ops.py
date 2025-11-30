@@ -562,7 +562,7 @@ def mixed_precision_ops(layer_quant_config={}, compute_dtype=torch.bfloat16, ful
                         _v = state_dict.pop(param_key, None)
                         if _v is None:
                             continue
-                        setattr(self, param_name, torch.nn.Parameter(_v.to(device=device), requires_grad=False))
+                        self.register_parameter(param_name, torch.nn.Parameter(_v.to(device=device), requires_grad=False))
                         manually_loaded_keys.append(param_key)
 
                 super()._load_from_state_dict(state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs)
@@ -570,6 +570,12 @@ def mixed_precision_ops(layer_quant_config={}, compute_dtype=torch.bfloat16, ful
                 for key in manually_loaded_keys:
                     if key in missing_keys:
                         missing_keys.remove(key)
+
+            def state_dict(self, *args, destination=None, prefix="", **kwargs):
+                sd = super().state_dict(*args, destination=destination, prefix=prefix, **kwargs)
+                if isinstance(self.weight, QuantizedTensor):
+                    sd["{}weight_scale".format(prefix)] = self.weight._layout_params['scale']
+                return sd
 
             def _forward(self, input, weight, bias):
                 return torch.nn.functional.linear(input, weight, bias)

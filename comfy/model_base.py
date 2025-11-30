@@ -341,6 +341,7 @@ class BaseModel(torch.nn.Module):
 
                 meta_out = {"_quantization_metadata": json.dumps(meta)}
                 meta_out = self.model_config.process_unet_state_dict_for_saving(meta_out)
+                metadata.update(meta_out)
 
         unet_state_dict = self.model_config.process_unet_state_dict_for_saving(unet_state_dict)
 
